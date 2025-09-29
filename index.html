@@ -5,47 +5,109 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TaskHub — .NET (PDF)</title>
   <meta name="description" content="Event-driven TaskHub (.NET, Redis, SQL) deep dive PDF." />
+
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 style-src 'self' 'unsafe-inline';
+                 img-src 'self' data: https:;
+                 frame-src https://snapshots.raintank.io https:;
+                 connect-src https:;
+                 script-src 'self' 'unsafe-inline';
+                 font-src 'self' https: data:;">
+  
   <style>
-    :root{--bg:#0b0d10;--fg:#e8eef2;--muted:#8fa3ad;--card:#11161c;--link:#7cc1ff}
+    :root {
+      --bg:#0b0d10;
+      --fg:#e8eef2;
+      --muted:#8fa3ad;
+      --card:#11161c;
+      --link:#7cc1ff;
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    header{padding:16px 20px;background:linear-gradient(180deg,#0f141a,#0b0d10)}
-    h1{margin:0;font-size:18px}
-    main{padding:16px}
+    header{padding:16px 20px;background:linear-gradient(180deg,#0f141a,#0b0d10);border-bottom:1px solid #1d2630}
+    h1{margin:0;font-size:20px}
+    main{padding:16px;display:flex;flex-direction:column;gap:40px}
+    h2{margin-top:0;color:var(--link)}
     .viewer{background:var(--card);border:1px solid #1d2630;border-radius:12px;overflow:hidden}
-    .bar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #1d2630;color:var(--muted)}
+    .bar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #1d2630;color:var(--muted);flex-wrap:wrap}
     .bar a{color:var(--link);text-decoration:none}
     .bar a:hover{text-decoration:underline}
-    .frame-wrap{height:calc(100vh - 150px)}
+    .frame-wrap{height:calc(100vh - 200px)}
     iframe,embed,object{width:100%;height:100%;border:0;display:block}
-    footer{padding:12px 20px;color:var(--muted);font-size:13px}
-    @media (max-width:768px){ .frame-wrap{height:calc(100vh - 180px)} }
+    footer{padding:12px 20px;color:var(--muted);font-size:13px;border-top:1px solid #1d2630;text-align:center}
+    @media (max-width:768px){ .frame-wrap{height:60vh} }
   </style>
 </head>
 <body>
   <header><h1>TaskHub — .NET</h1></header>
   <main>
-    <div class="viewer">
-      <div class="bar">
-        <span>Viewing: <strong>.Net . Monitoring. Logging</strong></span>
-        <span>•</span>
-        <a href="assets/Dotnet.pdf" download>Download</a>
-        <span>•</span>
-        <a href="assets/Dotnet.pdf" target="_blank" rel="noopener">Open in new tab</a>
+    <!-- PDF Documentation -->
+    <section>
+      <h2>📄 Project Documentation</h2>
+      <div class="viewer">
+        <div class="bar">
+          <span>Viewing: <strong>.NET • Monitoring • Logging</strong></span>
+          <span>•</span>
+          <a href="assets/Dotnet.pdf" download>Download</a>
+          <span>•</span>
+          <a href="assets/Dotnet.pdf" target="_blank" rel="noopener">Open in new tab</a>
+        </div>
+        <div class="frame-wrap">
+          <iframe
+            title="TaskHub deep dive PDF"
+            src="assets/Dotnet.pdf#view=FitH&toolbar=1&navpanes=0"
+            loading="eager">
+          </iframe>
+        </div>
       </div>
-      <div class="frame-wrap">
-        <!-- Native PDF viewer; most browsers support this -->
-        <iframe
-          title="TaskHub deep dive PDF"
-          src="assets/Dotnet.pdf#view=FitH&toolbar=1&navpanes=0"
-          loading="eager">
-        </iframe>
-        <!-- If a browser doesn't render PDFs inline, users can use the links above -->
+    </section>
+
+    <!-- Grafana Logs Snapshot -->
+    <section>
+      <h2>📊 Logs & Metrics Snapshot</h2>
+      <div class="viewer">
+        <div class="bar">
+          <span>Grafana Logs (Snapshot)</span>
+          <span>•</span>
+          <a href="https://snapshots.raintank.io/dashboard/snapshot/Fb6gxiPrOntaQuJED1sBHc8zcrIlYh0a?orgId=0"
+             target="_blank" rel="noopener">Open Fullscreen</a>
+        </div>
+        <div class="frame-wrap">
+          <iframe
+            title="Grafana Logs Snapshot"
+            src="https://snapshots.raintank.io/dashboard/snapshot/Fb6gxiPrOntaQuJED1sBHc8zcrIlYh0a?orgId=0&kiosk"
+            loading="lazy"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            referrerpolicy="no-referrer"
+            onload="this.dataset.loaded=1">
+          </iframe>
+          <!-- fallback block -->
+          <div id="snapshot-fallback" style="display:none;padding:14px;color:var(--muted);text-align:center">
+            <p>⚠️ Snapshot embedding blocked. View instead:</p>
+            <p>
+              <a href="assets/logs-snapshot.png" target="_blank" rel="noopener">View Screenshot</a> ·
+              <a href="https://snapshots.raintank.io/dashboard/snapshot/Fb6gxiPrOntaQuJED1sBHc8zcrIlYh0a?orgId=0"
+                 target="_blank" rel="noopener">Open Live Snapshot</a>
+            </p>
+            <img src="assets/logs-snapshot.png" alt="Grafana logs snapshot" style="max-width:100%;border-radius:8px;border:1px solid #1d2630"/>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   </main>
   <footer>© <span id="y"></span> Sriman • .NET • C# • Redis • SQL • Grafana/Loki</footer>
-  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+  <script>
+    document.getElementById('y').textContent=new Date().getFullYear();
+    // fallback if snapshot iframe doesn’t load in time
+    (function(){
+      const frame=document.querySelector('iframe[title="Grafana Logs Snapshot"]');
+      const fallback=document.getElementById('snapshot-fallback');
+      if(!frame) return;
+      const t=setTimeout(()=>{if(!frame.dataset.loaded){fallback.style.display='block';frame.style.display='none'}},4000);
+      frame.addEventListener('load',()=>clearTimeout(t));
+    })();
+  </script>
 </body>
 </html>
