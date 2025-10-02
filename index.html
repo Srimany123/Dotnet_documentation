@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TaskHub — .NET (PDF)</title>
-  <meta name="description" content="Event-driven TaskHub (.NET, Redis, SQL) deep dive PDF." />
+  <title>TaskHub — .NET (Docs & Logs)</title>
+  <meta name="description" content="Event-driven TaskHub (.NET, Redis, SQL, Grafana) deep dive with PDF and logs snapshot." />
 
-    <meta http-equiv="Content-Security-Policy"
+  <!-- Loosened CSP for iframes (PDF.js, Grafana snapshot).
+       We don't allow third-party scripts on THIS page, only frames. -->
+  <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
                  style-src 'self' 'unsafe-inline';
                  img-src 'self' data: https:;
-                 frame-src https://snapshots.raintank.io https:;
+                 frame-src https://snapshots.raintank.io https://mozilla.github.io https:;
                  connect-src https:;
                  script-src 'self' 'unsafe-inline';
                  font-src 'self' https: data:;">
-  
+
   <style>
     :root {
       --bg:#0b0d10;
@@ -37,36 +39,46 @@
     .frame-wrap{height:calc(100vh - 200px)}
     iframe,embed,object{width:100%;height:100%;border:0;display:block}
     footer{padding:12px 20px;color:var(--muted);font-size:13px;border-top:1px solid #1d2630;text-align:center}
-    @media (max-width:768px){ .frame-wrap{height:60vh} }
+    .hint{margin-left:auto;font-size:13px;color:var(--muted)}
+    @media (max-width:768px){
+      .frame-wrap{height:70vh}
+    }
   </style>
 </head>
 <body>
-  <header><h1>TaskHub — .NET</h1></header>
+  <header><h1>TaskHub — .NET Showcase</h1></header>
   <main>
     <!-- PDF Documentation -->
     <section>
-      <h2>--- Project Documentation ---</h2>
+      <h2>📄 Project Documentation</h2>
       <div class="viewer">
         <div class="bar">
           <span>Viewing: <strong>.NET • Monitoring • Logging</strong></span>
           <span>•</span>
           <a href="assets/Dotnet.pdf" download>Download</a>
           <span>•</span>
-          <a href="assets/Dotnet.pdf" target="_blank" rel="noopener">Open in new tab</a>
+          <a id="open-mobile" href="assets/Dotnet.pdf" target="_blank" rel="noopener">Open on mobile</a>
+          <span class="hint" id="pdf-hint"></span>
         </div>
         <div class="frame-wrap">
+          <!-- Start with native inline PDF. We'll swap to PDF.js on mobile/iOS. -->
           <iframe
+            id="pdf-frame"
             title="TaskHub deep dive PDF"
-            src="assets/Dotnet.pdf#view=FitH&toolbar=1&navpanes=0"
+            src="assets/Dotnet.pdf#view=FitH&zoom=page-width&toolbar=1&navpanes=0"
             loading="eager">
           </iframe>
+          <!-- Fallback if neither inline nor PDF.js can load -->
+          <div id="pdf-fallback" style="display:none;padding:14px;color:var(--muted);text-align:center">
+            <p>⚠️ Inline PDF viewer isn’t available. Use the buttons above to open the PDF.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Grafana Logs Snapshot -->
     <section>
-      <h2>--- Recent Sample Local Logs & Metrics Snapshot ---</h2>
+      <h2>📊 Logs & Metrics Snapshot</h2>
       <div class="viewer">
         <div class="bar">
           <span>Grafana Logs (Snapshot)</span>
@@ -83,7 +95,6 @@
             referrerpolicy="no-referrer"
             onload="this.dataset.loaded=1">
           </iframe>
-          <!-- fallback block -->
           <div id="snapshot-fallback" style="display:none;padding:14px;color:var(--muted);text-align:center">
             <p>⚠️ Snapshot embedding blocked. View instead:</p>
             <p>
@@ -97,16 +108,57 @@
       </div>
     </section>
   </main>
+
   <footer>© <span id="y"></span> Sriman • .NET • C# • Redis • SQL • Grafana/Loki</footer>
+
   <script>
-    document.getElementById('y').textContent=new Date().getFullYear();
-    // fallback if snapshot iframe doesn’t load in time
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // ----- Grafana snapshot fallback if the iframe never loads
     (function(){
-      const frame=document.querySelector('iframe[title="Grafana Logs Snapshot"]');
-      const fallback=document.getElementById('snapshot-fallback');
+      const frame = document.querySelector('iframe[title="Grafana Logs Snapshot"]');
+      const fallback = document.getElementById('snapshot-fallback');
       if(!frame) return;
-      const t=setTimeout(()=>{if(!frame.dataset.loaded){fallback.style.display='block';frame.style.display='none'}},4000);
-      frame.addEventListener('load',()=>clearTimeout(t));
+      const t = setTimeout(() => {
+        if(!frame.dataset.loaded){
+          fallback.style.display='block';
+          frame.style.display='none';
+        }
+      }, 4000);
+      frame.addEventListener('load', () => clearTimeout(t));
+    })();
+
+    // ----- Mobile-friendly PDF viewer
+    (function(){
+      const pdfFrame = document.getElementById('pdf-frame');
+      const openMobile = document.getElementById('open-mobile');
+      const hint = document.getElementById('pdf-hint');
+      const fallback = document.getElementById('pdf-fallback');
+
+      const isSmall = window.matchMedia('(max-width: 768px)').matches;
+      const ua = navigator.userAgent || '';
+      const isiOS = /iPad|iPhone|iPod/.test(ua);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+      // Use Mozilla PDF.js viewer on small screens or iOS/Safari where inline PDFs are flaky.
+      if (isSmall || isiOS || isSafari) {
+        const pdfUrl = new URL('assets/Dotnet.pdf', location.href).href;
+        const pdfjsUrl = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(pdfUrl) + '#zoom=page-width';
+        pdfFrame.src = pdfjsUrl;
+        hint.textContent = 'Optimized mobile viewer (PDF.js).';
+      } else {
+        hint.textContent = 'Using native inline PDF viewer.';
+      }
+
+      // Safety net: if PDF frame doesn’t load in 5s, show fallback.
+      let loaded = false;
+      const timer = setTimeout(() => {
+        if (!loaded) {
+          fallback.style.display = 'block';
+          pdfFrame.style.display = 'none';
+        }
+      }, 5000);
+      pdfFrame.addEventListener('load', () => { loaded = true; clearTimeout(timer); });
     })();
   </script>
 </body>
